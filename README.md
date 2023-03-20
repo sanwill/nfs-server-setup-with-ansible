@@ -11,7 +11,7 @@ The idea is to automate the NFS server setup on Fedora.
 * Update the yaml files with your local configuration. Look for ```#Note:``` it gives hints on which values need to be updated on certain task.
 * Here I use expansion disk (e.g. sdb) for the NFS storage, different from the primary disk where the OS is located.
 * The playbook only automate the mount of 1 expansion disk however it can be updated to mount multiple disk.
-* The YAML playbook was tested on Fedora 37. The similar approach can be used for Ubuntu but you need to replace the package manager from dnf to apt, change the systemd services etc.
+* The YAML playbook was tested on [Nobara](https://nobaraproject.org/) 37. The similar approach can be used for Ubuntu but you need to replace the package manager from dnf to apt, change the systemd services etc.
 * This guide only cover the NFS server at Fedora, it doesn't cover NFS clientsetup.
 
 ## Playbook Structure
