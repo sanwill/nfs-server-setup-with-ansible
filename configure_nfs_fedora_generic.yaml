@@ -1,0 +1,85 @@
+########################
+#Part 1: Mount the disk#
+########################
+#Note: Replace <NFS server host> with the NFS server host name
+#Note: Replace <mount point at NFS server>, example: /media/nfs
+- hosts: <NFS server host>
+  gather_facts: no
+  become: true
+  user: user
+  tasks:
+  - name: Creates directory for mount point*
+    file:
+      path: "{{ item }}"
+      state: directory
+      owner: nobody
+      group: nobody
+      mode: 0777
+    loop:
+     - <mount point at NFS server>
+
+#Note: Replace <label> with the disk/storage label
+  - name: Get UUID of disk using label 
+    shell:
+      blkid | grep <label> | awk -F"UUID=" '{print $2}' | awk -F"\"" '{print $2}'
+    register: storage_uuid_cmdout
+  - name: Set fact/variable for <label> storage dev
+    set_fact: 
+      storage_uuid: "{{ storage_uuid_cmdout.stdout }}"
+  - debug:
+      msg: "{{ storage_uuid }}"
+
+#Set auto mount of the disks
+#Note: Replace <mount point at NFS server>, example: /media/nfs
+  - name: Update /etc/fstab for auto mount
+    lineinfile:
+      path: /etc/fstab
+      state: present
+      line: "{{ item }}"
+    with_items:
+    - "UUID={{ storage_uuid }} <mount point at NFS server> ntfs noatime,errors=remount-ro  0  0"
+
+#########################
+#Part 2: NFS server setup
+#########################
+  - name: Install apt nfs server package on Fedora distro
+    dnf:
+      name: nfs-utils
+      state: present
+
+#Update /etc/exports for NFS connection
+#Note: Replace <mount point at NFS server>, example: /media/nfs
+  - name: Update /etc/exports for NFS connection
+    lineinfile:
+      path: /etc/exports
+      state: present
+      line: "{{ item }}"
+    with_items:
+    - "<mount point at NFS server> *(rw,sync,no_subtree_check)"
+#The star allow the NFS server to accept request from any IP.
+
+#Mount the disk
+  - name: Mount all
+    shell: mount -av
+    args:
+      warn: no
+
+#Start NFS server service
+  - name: Enable rpcbind
+    systemd:
+      name: rpcbind
+      enabled: yes
+      masked: no
+  - name: Enable nfs-server
+    systemd:
+      name: nfs-server
+      enabled: yes
+      masked: no
+  - name: Restart systemd rpcbind
+    systemd:
+      name: rpcbind
+      state: restarted
+  - name: Restart systemd nfs-server
+    systemd:
+      name: nfs-server
+      state: restarted
