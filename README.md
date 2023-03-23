@@ -5,7 +5,7 @@ The idea is to automate the NFS server setup on Fedora.
 * OS: Fedora (or Fedora based distro)
 * Ansible is setup at installation server or locally at NFS server
 * Have superuser right
-* The [playbook](https://github.com/sanwill/nfs-server-setup-with-ansible/blob/main/configure_samba_fedora_generic.yaml)
+* The [playbook](https://github.com/sanwill/nfs-server-setup-with-ansible/blob/main/configure_nfs_fedora_generic.yaml)
 
 ## Few Notes:
 * Update the yaml files with your local configuration. Look for ```#Note:``` it gives hints on which values need to be updated on certain task.
