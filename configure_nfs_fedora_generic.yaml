@@ -32,6 +32,7 @@
 
 #Mount units must be named after the mount point directories they control. 
 #Example: the mount point of /home/regularuser/diskmount must be configured in a unit file as home-regularuser-diskmount.mount.
+#Example: the mount point of /media/nfs must be configured in a unit file as media-nfs.mount.
 #Replace all "mount-point-at-NFS-server" with the correct name
 
   - name: Create mount-point-at-NFS-server.mount to automount disk using systemd
