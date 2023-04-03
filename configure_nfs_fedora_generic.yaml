@@ -29,15 +29,26 @@
   - debug:
       msg: "{{ storage_uuid }}"
 
-#Set auto mount of the disks
-#Note: Replace <mount point at NFS server>, example: /media/nfs
-  - name: Update /etc/fstab for auto mount
-    lineinfile:
-      path: /etc/fstab
-      state: present
-      line: "{{ item }}"
-    with_items:
-    - "UUID={{ storage_uuid }} <mount point at NFS server> ntfs noatime,errors=remount-ro  0  0"
+
+#Mount units must be named after the mount point directories they control. 
+#Example: the mount point of /home/regularuser/diskmount must be configured in a unit file as home-regularuser-diskmount.mount.
+#Replace all "mount-point-at-NFS-server" with the correct name
+
+  - name: Create mount-point-at-NFS-server.mount to automount disk using systemd
+    copy:
+      dest: "/etc/systemd/system/mount-point-at-NFS-server.mount"
+      content: |
+        [Unit]
+        Description=Auto mount disks with systemd
+
+        [Mount]
+        What=/dev/disk/by-uuid/{{ storage_uuid }}
+        Where=<mount point at NFS server>
+        Type=ntfs
+        Options=defaults
+
+        [Install]
+        WantedBy=multi-user.target
 
 #########################
 #Part 2: NFS server setup
@@ -58,16 +69,34 @@
     - "<mount point at NFS server> *(rw,sync,no_subtree_check)"
 #The star allow the NFS server to accept request from any IP.
 
-#Mount the disk
-  - name: Mount all
-    shell: mount -av
-    args:
-      warn: no
 
-#Start NFS server service
+#Reload
   - name: Reload systemd
     systemd:
       daemon_reload: yes
+
+#Start systemd mount
+  - name: Enable mount-point-at-NFS-server.mount
+    systemd:
+      name: mount-point-at-NFS-server.mount
+      enabled: yes
+      masked: no
+  - name: Restart mount-point-at-NFS-server.mount
+    systemd:
+      name: mount-point-at-NFS-server.mount
+      state: restarted
+
+  - name: Enable media-homeshare-WD4TB.mount
+    systemd:
+      name: media-homeshare-WD4TB.mount
+      enabled: yes
+      masked: no
+  - name: Restart media-homeshare-WD4TB.mount
+    systemd:
+      name: media-homeshare-WD4TB.mount
+      state: restarted
+
+#Start NFS server
   - name: Enable rpcbind
     systemd:
       name: rpcbind
