@@ -29,7 +29,7 @@
   - debug:
       msg: "{{ storage_uuid }}"
 
-
+#Note:
 #Mount units must be named after the mount point directories they control. 
 #Example: the mount point of /home/regularuser/diskmount must be configured in a unit file as home-regularuser-diskmount.mount.
 #Example: the mount point of /media/nfs must be configured in a unit file as media-nfs.mount.
